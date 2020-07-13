@@ -1,33 +1,38 @@
 import React from 'react';
 import './style.css';
 
-class CalculatorLine extends React.Component {
+const CalculatorLine = (props) => {
+    const formatter = new Intl.NumberFormat('en-UK', {
+        style: 'currency',
+        currency: 'GBP',
+        minimumFractionDigits: 2
+    });
 
-    constructor(props) {
-        super(props);
-
-        this.state = {
-        };
+    const lower = formatter.format(props.lowerBound);
+    const upper = props.lowerBound > 0.00 && props.upperBound === 0.00 ? "Above" : formatter.format(props.upperBound);
+    let taxable = 0.00;
+    if (props.amount > 0.00 && props.amount >= props.upperBound) {
+        taxable = props.upperBound - props.lowerBound;
+    } else
+    if (props.amount > 0.00 && props.amount >= props.lowerBound) {
+        taxable = props.amount - props.lowerBound;
     }
-    
-    render() {
-        const formatter = new Intl.NumberFormat('en-UK', {
-            style: 'currency',
-            currency: 'GBP',
-            minimumFractionDigits: 2
-        });
-    
-        return (
-            <tr className="CalculatorLine">
-                <td>Band {formatter.format(this.props.lowerBound)} to {formatter.format(this.props.upperBound)}</td><td>£0.00</td><td>£0.00</td>
-            </tr>
-        );
-    };
-}
+
+    const tax = taxable * props.rate;
+
+    return (
+        <tr className="CalculatorLine">
+            <td>Band {lower} to {upper} at {(props.rate * 100) + "%"}</td>
+            <td>{formatter.format(taxable)}</td><td>{formatter.format(tax)}</td>
+        </tr>
+    );
+};
 
 CalculatorLine.defaultProps = {
     lowerBound: 0.00, 
-    upperBound: 0.00    
+    upperBound: 0.00,
+    amount: 0.00,
+    rate: 0.00    
 }
 
 export default CalculatorLine;
