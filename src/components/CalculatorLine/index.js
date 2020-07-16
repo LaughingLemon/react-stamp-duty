@@ -1,45 +1,62 @@
 import React from 'react';
 import './style.css';
+import { addToTotalTax } from "../../actions/tax";
+import { connect } from "react-redux";
 
 class CalculatorLine extends React.Component {
     constructor(props) {
         super(props);
         this.changeTax = this.changeTax.bind(this);
-    }
-
-    changeTax(tax) {
-        this.props.onTaxChange && this.props.onTaxChange(tax);  
-    }
-    
-    render() {
-        const formatter = new Intl.NumberFormat('en-UK', {
+        
+        this.formatter = new Intl.NumberFormat('en-UK', {
             style: 'currency',
             currency: 'GBP',
             minimumFractionDigits: 2
         });
-        
-        const lower = formatter.format(this.props.lowerBound);
-        const upper = this.props.lowerBound > 0.00 && 
-                      this.props.upperBound === 0.00 ? 
-                      "Above" : 
-                      formatter.format(this.props.upperBound);
 
-        let taxable = 0.00;
-        if (this.props.amount > 0.00 && this.props.amount >= this.props.upperBound) {
-            taxable = this.props.upperBound - this.props.lowerBound;
+        this.taxable = 0.00;
+        this.tax = 0.00;
+    }
+
+    changeTax(tax) {
+        console.log("tax", tax);
+        if (tax > 0.00) {
+            this.props.dispatch(addToTotalTax({tax: tax}));
+        }
+    }
+
+    componentDidUpdate() {
+        this.changeTax(+this.tax.toFixed(2));
+    }
+
+    shouldComponentUpdate(nextProps, nextState) {
+        const rerender = nextProps.amount !== this.props.amount;
+
+        this.taxable = 0.00;
+
+        this.lower = this.formatter.format(this.props.lowerBound);
+        this.upper = nextProps.lowerBound > 0.00 && 
+                     nextProps.upperBound === 0.00 ? 
+                     "Above" : 
+                     this.formatter.format(nextProps.upperBound);
+
+        if (nextProps.amount > 0.00 && nextProps.upperBound > 0.00 && nextProps.amount >= nextProps.upperBound) {
+            this.taxable = nextProps.upperBound - nextProps.lowerBound;
         } else
-        if (this.props.amount > 0.00 && this.props.amount >= this.props.lowerBound) {
-            taxable = this.props.amount - this.props.lowerBound;
+        if (nextProps.amount > 0.00 && nextProps.amount >= nextProps.lowerBound) {
+            this.taxable = nextProps.amount - nextProps.lowerBound;
         }
 
-        const tax = taxable * this.props.rate;
-        
-        this.changeTax(+tax.toFixed(2));
+        this.tax = this.taxable * nextProps.rate;
 
+        return rerender;
+    }
+    
+    render() {
         return (
             <tr className="CalculatorLine">
-                <td>Band {lower} to {upper} at {(this.props.rate * 100) + "%"}</td>
-                <td>{formatter.format(taxable)}</td><td>{formatter.format(tax)}</td>
+                <td>Band {this.lower} to {this.upper} at {(this.props.rate * 100) + "%"}</td>
+                <td>{this.formatter.format(this.taxable)}</td><td>{this.formatter.format(this.tax)}</td>
             </tr>
         );       
     }
@@ -52,4 +69,10 @@ CalculatorLine.defaultProps = {
     rate: 0.00    
 }
 
-export default CalculatorLine;
+const mapStateToProps = (state) => (
+    {
+        totalTax: state.totalTax
+    }
+);
+
+export default connect(mapStateToProps)(CalculatorLine);

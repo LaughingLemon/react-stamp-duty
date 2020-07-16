@@ -2,10 +2,17 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
 import App from './App';
+import configureStore from "./store/configureStore";
+import {Provider} from "react-redux";
 
-ReactDOM.render(
+const appStore = configureStore();
+
+const jsx = (
   <React.StrictMode>
-    <App />
-  </React.StrictMode>,
-  document.getElementById('root')
+    <Provider store={appStore}>
+      <App />
+    </Provider>
+  </React.StrictMode>
 );
+
+ReactDOM.render(jsx, document.getElementById('root'));
