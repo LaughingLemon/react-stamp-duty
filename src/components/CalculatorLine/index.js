@@ -19,7 +19,6 @@ class CalculatorLine extends React.Component {
     }
 
     changeTax(tax) {
-        console.log("tax", tax);
         if (tax > 0.00) {
             this.props.dispatch(addToTotalTax({tax: tax}));
         }
@@ -34,28 +33,28 @@ class CalculatorLine extends React.Component {
 
         this.taxable = 0.00;
 
-        this.lower = this.formatter.format(this.props.lowerBound);
-        this.upper = nextProps.lowerBound > 0.00 && 
-                     nextProps.upperBound === 0.00 ? 
-                     "Above" : 
-                     this.formatter.format(nextProps.upperBound);
-
-        if (nextProps.amount > 0.00 && nextProps.upperBound > 0.00 && nextProps.amount >= nextProps.upperBound) {
-            this.taxable = nextProps.upperBound - nextProps.lowerBound;
+        if (nextProps.amount > 0.00 && this.props.upperBound > 0.00 && nextProps.amount >= this.props.upperBound) {
+            this.taxable = this.props.upperBound - this.props.lowerBound;
         } else
-        if (nextProps.amount > 0.00 && nextProps.amount >= nextProps.lowerBound) {
-            this.taxable = nextProps.amount - nextProps.lowerBound;
+        if (nextProps.amount > 0.00 && nextProps.amount >= this.props.lowerBound) {
+            this.taxable = nextProps.amount - this.props.lowerBound;
         }
 
-        this.tax = this.taxable * nextProps.rate;
+        this.tax = this.taxable * this.props.rate;
 
         return rerender;
     }
     
     render() {
+        const lower = this.formatter.format(this.props.lowerBound);
+        const upper = this.props.lowerBound > 0.00 && 
+                     this.props.upperBound === 0.00 ? 
+                     "Above" : 
+                     this.formatter.format(this.props.upperBound);
+
         return (
             <tr className="CalculatorLine">
-                <td>Band {this.lower} to {this.upper} at {(this.props.rate * 100) + "%"}</td>
+                <td>Band {lower} to {upper} at {(this.props.rate * 100) + "%"}</td>
                 <td>{this.formatter.format(this.taxable)}</td><td>{this.formatter.format(this.tax)}</td>
             </tr>
         );       
