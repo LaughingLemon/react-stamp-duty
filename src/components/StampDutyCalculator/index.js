@@ -4,6 +4,7 @@ import CalculatorLine from "../CalculatorLine";
 import CalculatorTotal from '../CalculatorTotal';
 import { connect } from "react-redux";
 import { resetTotalTax } from "../../actions/tax";
+import CurrencyInput from "react-currency-input";
 
 class StampDutyCalculator extends React.Component {
 
@@ -21,17 +22,17 @@ class StampDutyCalculator extends React.Component {
         return nextState.taxableAmount !== this.state.taxableAmount;
     }
 
-    onAmountChange(evt) {
+    onAmountChange(evt, maskedValue, floatValue) {
         evt.preventDefault();
 
         this.props.dispatch(resetTotalTax());
-        this.setState({taxableAmount: evt.target.value});
+        this.setState({taxableAmount: floatValue});
     }
 
     render() {
         return (
             <div className="StampDutyCalculator">
-                <div><label htmlFor="amount">Amount</label><input type="number" name="amount" id="amount" onChange={this.onAmountChange} /></div>
+                <div><label htmlFor="amount">Amount</label><CurrencyInput prefix="£" value={this.state.taxableAmount} onChangeEvent={this.onAmountChange} /></div>
                 <table>
                     <thead><tr><th>Band</th><th>Amount Taxable</th><th>Stamp Duty</th></tr></thead>
                     <tbody>
